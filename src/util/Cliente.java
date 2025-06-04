@@ -13,4 +13,8 @@ public class Cliente {
         this.senha = senha;
     }
 
+    public void avaliar(AvaliacaoAtendimento atendimento, AvaliacaoComida comida, AvaliacaoAmbiente ambiente) {
+
+    }
+
 }
