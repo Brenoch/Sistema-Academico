@@ -1,7 +1,6 @@
 package util;
 
-import java.sql.SQLOutput;
-import java.util.Objects;
+import java.util.Scanner;
 
 public class Cliente {
     private int idcliente;
@@ -17,48 +16,48 @@ public class Cliente {
         this.senha = senha;
     }
 
-    public static void logar(int cpf, String nome, String email, String senha){
-        boolean login;
-        while (true) {
-            System.out.println("Digite seu email: ");
-            String email = login.nextLine();
-
-            if (Objects.equals(email, jose.getEmail())) {
-                break;
-            } else {
-                System.out.println("Email incorreto! Tente novamente.");
-            }
-        }
-        while (true) {
-            System.out.println("Digite sua senha: ");
-            String senha = login.nextLine();
-
-            if (Objects.equals(senha, jose.getSenha())) {
-                break;
-            }
-            else{
-                System.out.println("Senha incorreta! Tente novamente.");
-            }
-        }
-
-    }
-
-    public String getSenha(){
-        return senha;
-    }
-
-    public String getEmail(){
+    public String getEmail() {
         return email;
     }
 
-    public static void avaliar(AvaliacaoAtendimento atendimento, AvaliacaoComida comida, AvaliacaoAmbiente ambiente, AvaliacaoLocalizacao local) {
-        float nota = (atendimento.getNota() + comida.getNota() + ambiente.getNota() + local.getNota());
+    public String getSenha() {
+        return senha;
+    }
 
-        System.out.println("Sua avaliação:");
-        System.out.printf("Atendimento: %-10.2f%n", atendimento.getNotaAtendimento());
-        System.out.printf("Comida:      %-10.2f%n", comida.getNotaComida());
-        System.out.printf("Ambiente:    %-10.2f%n", ambiente.getNotaAmbiente());
-        System.out.printf("Localização: %-10.2f%n", local.getNotaLocalizacao());
+    public boolean login(String email, String senha) {
+        if (this.email.equals(email) && this.senha.equals(senha)) {
+            System.out.println("Login bem-sucedido!");
+            return true;
+        } else {
+            System.out.println("Email ou senha incorretos.");
+            return false;
+        }
+    }
 
+    public void autenticacao() {
+        try (Scanner scanner = new Scanner(System.in)) {
+            String email;
+            String senha;
+
+            do {
+                System.out.println("Digite seu email: ");
+                email = scanner.nextLine();
+
+                System.out.println("Digite sua senha: ");
+                senha = scanner.nextLine();
+
+            } while (!login(email, senha));
+        }
+    }
+
+    public void avaliar(AvaliacaoAtendimento atendimento, AvaliacaoComida comida,
+                        AvaliacaoAmbiente ambiente, AvaliacaoLocalizacao local) {
+
+
+        System.out.println("\n--- Sua avaliação ---");
+        System.out.printf("Atendimento: %.1f%n", atendimento.getNota());
+        System.out.printf("Comida:      %.1f%n", comida.getNota());
+        System.out.printf("Ambiente:    %.1f%n", ambiente.getNota());
+        System.out.printf("Localização: %.1f%n", local.getNota());
     }
 }
