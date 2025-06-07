@@ -1,8 +1,5 @@
-import util.AvaliacaoAmbiente;
-import util.AvaliacaoAtendimento;
-import util.AvaliacaoComida;
-import util.Cliente;
-import util.AvaliacaoLocalizacao;
+import util.*;
+
 import java.util.Scanner;
 
 public class Main {
@@ -22,6 +19,9 @@ public class Main {
         System.out.println("Comida: " + comida.getNotaComida());
         System.out.println("Ambiente: " + ambiente.getNotaAmbiente());
         System.out.println("Localização: " + local.getNotaLocalizacao());
+
+        Classificacao.calcularClassificacao();
+
 
     }
 }
