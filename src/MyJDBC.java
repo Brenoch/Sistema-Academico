@@ -4,7 +4,7 @@ public class MyJDBC {
     public static void main(String[] args){
         try{
             Connection connection = DriverManager.getConnection(
-                    "jdbc:mysql://192.168.100.6:3306/avaliacao_restaurantes",
+                    "jdbc:mysql://192.168.100.6:3306/sistema_avaliacao",
                     "programador",
                     "1234teste-"
             );

@@ -12,7 +12,7 @@ public class AvaliacaoLocalizacao extends Avaliacao {
         }
 
         @Override
-        void comentar() {
+        protected void comentar() {
 
         }
     }
