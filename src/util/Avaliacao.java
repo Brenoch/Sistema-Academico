@@ -12,7 +12,10 @@ public abstract class Avaliacao {
     }
 
 
-    abstract void comentar();
+    protected abstract void comentar();
+
+    public void setNota(int anInt) {
+    }
 }
 
 
