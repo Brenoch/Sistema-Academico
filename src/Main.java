@@ -6,7 +6,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner aval = new Scanner(System.in);
 
-        Cliente armando = new Cliente(19324295, "Armando", "abc", "12345");
+        Cliente armando = new Cliente(1, "12356788", "armando" , "abc", "12345");
         armando.autenticacao();
 
         AvaliacaoAtendimento atendimento = new AvaliacaoAtendimento(5.0f);

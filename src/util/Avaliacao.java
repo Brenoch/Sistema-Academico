@@ -11,7 +11,6 @@ public abstract class Avaliacao {
         return nota;
     }
 
-
     protected abstract void comentar();
 
     public void setNota(int anInt) {

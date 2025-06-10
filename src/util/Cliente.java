@@ -2,14 +2,14 @@ package util;
 
 import java.util.Scanner;
 
-public class Cliente {
+public class Cliente implements ClienteInterface {
     private int idcliente;
-    private int cpf;
+    private String cpf;
     private String nome;
     private String email;
     private String senha;
 
-    public Cliente(int cpf, String nome, String email, String senha) {
+    public Cliente(int idcliente, String cpf, String nome, String email, String senha) {
         this.cpf = cpf;
         this.nome = nome;
         this.email = email;
@@ -24,6 +24,18 @@ public class Cliente {
         return senha;
     }
 
+    public String getCpf() {
+        return cpf;
+    }
+    public String getNome() {
+        return nome;
+    }
+    public int getIdcliente() {
+        return idcliente;
+    }
+
+
+
     public boolean login(String email, String senha) {
         if (this.email.equals(email) && this.senha.equals(senha)) {
             System.out.println("Login bem-sucedido!");
@@ -32,6 +44,10 @@ public class Cliente {
             System.out.println("Email ou senha incorretos.");
             return false;
         }
+    }
+
+    public boolean login(String email, boolean isEmailOnly) {
+        return login(email, this.senha);
     }
 
     public void autenticacao() {
@@ -60,4 +76,10 @@ public class Cliente {
         System.out.printf("Ambiente:    %.1f%n", ambiente.getNota());
         System.out.printf("Localização: %.1f%n", local.getNota());
     }
+
+
+    public void setId(int idcliente) {
+    }
+
+
 }

@@ -19,7 +19,7 @@ package DAO;
                                 Cliente cliente = (Cliente) objeto;
                                 String sql = "INSERT INTO cliente (cpf, nome, email, senha) VALUES (?, ?, ?, ?)";
                                 try (PreparedStatement pstm = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                                    pstm.setString(1, cliente.getcpf());
+                                    pstm.setString(1, cliente.getCpf());
                                     pstm.setString(2, cliente.getNome());
                                     pstm.setString(3, cliente.getEmail());
                                     pstm.setString(4, cliente.getSenha());
@@ -125,7 +125,7 @@ package DAO;
                                 Cliente cliente = (Cliente) objeto;
                                 String sql = "UPDATE cliente SET cpf = ?, nome = ?, email = ?, senha = ? WHERE idcliente = ?";
                                 try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-                                    pstm.setString(1, cliente.getcpf());
+                                    pstm.setString(1, cliente.getCpf());
                                     pstm.setString(2, cliente.getNome());
                                     pstm.setString(3, cliente.getEmail());
                                     pstm.setString(4, cliente.getSenha());
