@@ -1,8 +1,10 @@
 package util;
 
+import dao.AvaliacaoAtendimentoDAO;
+
 public interface ClienteInterface {
     void autenticacao();
-    void avaliar(AvaliacaoAtendimento atendimento, AvaliacaoComida comida,
+    void avaliar(AvaliacaoAtendimentoDAO atendimento, AvaliacaoComida comida,
                  AvaliacaoAmbiente ambiente, AvaliacaoLocalizacao local);
     String getCpf();
     String getNome();
