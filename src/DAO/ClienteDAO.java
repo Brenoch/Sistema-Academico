@@ -1,5 +1,6 @@
 package DAO;
                         import util.Avaliacao;
+                        import util.AvaliacaoComida;
                         import util.Cliente;
                         import java.sql.*;
                         import java.util.ArrayList;
@@ -29,9 +30,8 @@ package DAO;
                                             cliente.setId(rst.getInt(1));
                                         }
                                     }
-                                    // Salvar avaliações, se houver
                                     AvaliacaoDAO tdao = new AvaliacaoDAO(connection);
-                                    for (Avaliacao avaliacao : cliente.getAvaliacao()) {
+                                    for (Avaliacao avaliacao : Avaliacao.getAvaliacao()) {
                                         tdao.salvar(avaliacao);
                                     }
                                 } catch (SQLException e) {
@@ -108,7 +108,6 @@ package DAO;
                                                 @Override
                                                 public float getNota() { return nota; }
                                             };
-                                            ultimo.addAvaliacao(a);
                                         }
                                     }
                                 } catch (SQLException e) {

@@ -2,7 +2,7 @@ package util;
 
 import java.util.Scanner;
 
-public class Cliente implements ClienteInterface {
+public class Cliente {
     private int idcliente;
     private String cpf;
     private String nome;
@@ -66,19 +66,9 @@ public class Cliente implements ClienteInterface {
         }
     }
 
-    public void avaliar(AvaliacaoAtendimento atendimento, AvaliacaoComida comida,
-                        AvaliacaoAmbiente ambiente, AvaliacaoLocalizacao local) {
 
 
-        System.out.println("\n--- Sua avaliação ---");
-        System.out.printf("Atendimento: %.1f%n", atendimento.getNota());
-        System.out.printf("Comida:      %.1f%n", comida.getNota());
-        System.out.printf("Ambiente:    %.1f%n", ambiente.getNota());
-        System.out.printf("Localização: %.1f%n", local.getNota());
-    }
-
-
-    public void setId(int idcliente) {
+public void setId(int idcliente) {
     }
 
 
