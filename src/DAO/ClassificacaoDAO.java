@@ -1,114 +1,86 @@
 package DAO;
 
-import util.Classificacao;
-import java.sql.*;
 import java.util.ArrayList;
+import util.Classificacao; // Importa a classe Classificacao
 
-public class ClassificacaoDAO implements BaseDAO {
-    private final Connection connection;
+public class ClassificacaoDAO implements BaseDAO { // Implementa BaseDAO
 
-    public ClassificacaoDAO(Connection connection) {
-        this.connection = connection;
+    private static ArrayList<Classificacao> classificacoesDB = new ArrayList<>();
+    private static int nextIdClassificacao = 1; // Para simular auto_increment para Classificacao
+
+    // Nota: A classe Classificacao não tem um ID intrínseco.
+    // Para fins de DAO, vamos gerar um ID para ela aqui.
+    // Em um cenário real, talvez a Classificacao não seria salva diretamente,
+    // mas sim calculada a partir das avaliações existentes.
+    // Para manter a conformidade com BaseDAO, adicionaremos um ID aqui.
+
+    // A classe Classificacao precisa de um setId/getId para ser manipulável por um DAO.
+    // Se a Classificacao não tiver ID, o DAO não faz sentido para as operações de buscar/atualizar/excluir por ID.
+    // Para simplificar, vou assumir que você pode adicionar um idClassificacao na classe Classificacao
+    // ou que este DAO é mais conceitual e não fará CRUD completo com IDs de Classificacao.
+
+    @Override
+    public void salvar(Object obj) {
+        if (obj instanceof Classificacao) {
+            Classificacao classificacao = (Classificacao) obj;
+            // Para Classificacao, precisaria de um setter de ID nela
+            // classificacao.setIdClassificacao(nextIdClassificacao++);
+            classificacoesDB.add(classificacao);
+            System.out.println("Classificação salva (simulada).");
+        } else {
+            System.out.println("Objeto não é uma instância de Classificacao. Não salvo.");
+        }
     }
 
     @Override
-    public void salvar(Object entity) {
-        if (!(entity instanceof Classificacao)) {
-            throw new IllegalArgumentException("Objeto deve ser do tipo Classificacao.");
+    public Object buscarPorId(int id) {
+        System.out.println("Buscando classificação pelo ID: " + id);
+        // Para buscar Classificacao por ID, ela precisaria de um campo idClassificacao
+        // e um método getIdClassificacao().
+        // Como não há no Classificacao.java fornecido, este método seria mais complexo
+        // ou precisaria de alteração em Classificacao.java.
+        // Simulando apenas...
+        if (!classificacoesDB.isEmpty() && id > 0 && id <= classificacoesDB.size()) {
+            System.out.println("Classificação encontrada (simulada).");
+            return classificacoesDB.get(id - 1); // Apenas um exemplo simples de busca
         }
-        Classificacao classificacao = (Classificacao) entity;
-        String sql = "INSERT INTO classificacao (avaliacao_localizacao, avaliacao_ambiente, avaliacao_comida, avaliacao_atendimento) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement pstm = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstm.setFloat(1, classificacao.avaliacaoLocalizacao.getNota());
-            pstm.setFloat(2, classificacao.avaliacaoAmbiente.getNota());
-            pstm.setFloat(3, classificacao.avaliacaoComida.getNota());
-            pstm.setFloat(4, classificacao.avaliacaoAtendimento.getNota());
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public Object findById(int id) {
-        String sql = "SELECT id, avaliacao_localizacao, avaliacao_ambiente, avaliacao_comida, avaliacao_atendimento FROM classificacao WHERE id = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, id);
-            try (ResultSet rst = pstm.executeQuery()) {
-                if (rst.next()) {
-                    Classificacao c = new Classificacao(
-                        rst.getFloat("avaliacao_localizacao"),
-                        rst.getFloat("avaliacao_ambiente"),
-                        rst.getFloat("avaliacao_comida"),
-                        rst.getFloat("avaliacao_atendimento")
-                    );
-                    return c;
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        System.out.println("Classificação com ID " + id + " não encontrada.");
         return null;
     }
 
     @Override
-    public ArrayList<Object> findAllLazyLoading() {
-        ArrayList<Object> lista = new ArrayList<>();
-        String sql = "SELECT id, avaliacao_localizacao, avaliacao_ambiente, avaliacao_comida, avaliacao_atendimento FROM classificacao";
-        try (PreparedStatement pstm = connection.prepareStatement(sql);
-             ResultSet rst = pstm.executeQuery()) {
-            while (rst.next()) {
-                Classificacao c = new Classificacao(
-                    rst.getFloat("avaliacao_localizacao"),
-                    rst.getFloat("avaliacao_ambiente"),
-                    rst.getFloat("avaliacao_comida"),
-                    rst.getFloat("avaliacao_atendimento")
-                );
-                lista.add(c);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    public ArrayList<Object> listarTodosLazyLoading() {
+        System.out.println("Listando todas as classificações (Lazy Loading)...");
+        ArrayList<Object> listaClassificacoes = new ArrayList<>();
+        for (Classificacao classificacao : classificacoesDB) {
+            listaClassificacoes.add(classificacao);
         }
-        return lista;
+        System.out.println("Total de classificações listadas: " + listaClassificacoes.size());
+        return listaClassificacoes;
     }
 
     @Override
-    public ArrayList<Object> findAllEagerLoading() {
-        return findAllLazyLoading();
+    public ArrayList<Object> listarTodosEagerLoading() {
+        System.out.println("Listando todas as classificações (Eager Loading)...");
+        return listarTodosLazyLoading();
     }
 
     @Override
-    public void atualizar(Object entity) {
-        if (!(entity instanceof Classificacao)) {
-            throw new IllegalArgumentException("Objeto deve ser do tipo Classificacao.");
+    public void atualizar(Object obj) {
+        if (obj instanceof Classificacao) {
+            Classificacao classificacaoAtualizada = (Classificacao) obj;
+            // Para atualizar por ID, Classificacao precisaria de um campo de ID.
+            // Aqui, apenas um exemplo de atualização sem ID específico.
+            System.out.println("Atualizando classificação (simulada).");
+        } else {
+            System.out.println("Objeto não é uma instância de Classificacao. Não atualizado.");
         }
-        Classificacao classificacao = (Classificacao) entity;
-        String sql = "UPDATE classificacao SET avaliacao_localizacao = ?, avaliacao_ambiente = ?, avaliacao_comida = ?, avaliacao_atendimento = ? WHERE id = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setFloat(1, classificacao.avaliacaoLocalizacao.getNota());
-            pstm.setFloat(2, classificacao.avaliacaoAmbiente.getNota());
-            pstm.setFloat(3, classificacao.avaliacaoComida.getNota());
-            pstm.setFloat(4, classificacao.avaliacaoAtendimento.getNota());
-            pstm.setInt(5, 0);
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void excluir(Object entity) {
-        excluir(0);
     }
 
     @Override
     public void excluir(int id) {
-        String sql = "DELETE FROM classificacao WHERE id = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, id);
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        System.out.println("Tentando excluir classificação pelo ID: " + id);
+        // Excluir por ID também exigiria um campo ID em Classificacao.
+        System.out.println("Exclusão de classificação (simulada) para ID: " + id);
     }
 }

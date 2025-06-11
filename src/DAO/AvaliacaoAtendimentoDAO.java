@@ -1,99 +1,86 @@
-// src/DAO/AvaliacaoAtendimentoDAO.java
 package DAO;
 
-import util.AvaliacaoAtendimento;
-import java.sql.*;
 import java.util.ArrayList;
+import util.AvaliacaoAtendimento; // Importa a classe de entidade
 
-public class AvaliacaoAtendimentoDAO implements BaseDAO {
-    private final Connection connection;
+public class AvaliacaoAtendimentoDAO implements BaseDAO { // CORRIGIDO: Implementa BaseDAO
 
-    public AvaliacaoAtendimentoDAO(Connection connection) {
-        this.connection = connection;
-    }
+    // Simula o banco de dados em memória
+    private static ArrayList<AvaliacaoAtendimento> avaliacoesAtendimentoDB = new ArrayList<>();
+    private static int nextIdAvaliacaoAtendimento = 1; // Para simular auto_increment
 
     @Override
-    public void salvar(Object entity) {
-        if (!(entity instanceof AvaliacaoAtendimento)) {
-            throw new IllegalArgumentException("Objeto deve ser do tipo AvaliacaoAtendimento.");
-        }
-        AvaliacaoAtendimento avaliacao = (AvaliacaoAtendimento) entity;
-        String sql = "INSERT INTO avaliacao_atendimento (nota_atendimento) VALUES (?)";
-        try (PreparedStatement pstm = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstm.setFloat(1, avaliacao.getNotaAtendimento());
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    public void salvar(Object obj) {
+        if (obj instanceof AvaliacaoAtendimento) {
+            AvaliacaoAtendimento avaliacaoAtendimento = (AvaliacaoAtendimento) obj;
+            // Simula o auto_increment do ID
+            avaliacaoAtendimento.setIdAvaliacao(nextIdAvaliacaoAtendimento++); // Usa setIdAvaliacao da superclasse Avaliacao
+            avaliacoesAtendimentoDB.add(avaliacaoAtendimento);
+            System.out.println("Avaliação de Atendimento salva (ID: " + avaliacaoAtendimento.getIdAvaliacao() + ", Nota: " + avaliacaoAtendimento.getNotaAtendimento() + ")");
+        } else {
+            System.out.println("Objeto não é uma instância de AvaliacaoAtendimento. Não salvo.");
         }
     }
 
     @Override
-    public Object findById(int id) {
-        String sql = "SELECT id, nota_atendimento FROM avaliacao_atendimento WHERE id = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, id);
-            try (ResultSet rst = pstm.executeQuery()) {
-                if (rst.next()) {
-                    AvaliacaoAtendimento a = new AvaliacaoAtendimento(rst.getFloat("nota_atendimento"));
-                    return a;
-                }
+    public Object buscarPorId(int id) {
+        System.out.println("Buscando avaliação de atendimento pelo ID: " + id);
+        for (AvaliacaoAtendimento avaliacao : avaliacoesAtendimentoDB) {
+            if (avaliacao.getIdAvaliacao() == id) { // Usa getIdAvaliacao
+                System.out.println("Avaliação de Atendimento encontrada: " + avaliacao.getNotaAtendimento());
+                return avaliacao;
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
+        System.out.println("Avaliação de Atendimento com ID " + id + " não encontrada.");
         return null;
     }
 
     @Override
-    public ArrayList<Object> findAllLazyLoading() {
-        ArrayList<Object> lista = new ArrayList<>();
-        String sql = "SELECT id, nota_atendimento FROM avaliacao_atendimento";
-        try (PreparedStatement pstm = connection.prepareStatement(sql);
-             ResultSet rst = pstm.executeQuery()) {
-            while (rst.next()) {
-                AvaliacaoAtendimento a = new AvaliacaoAtendimento(rst.getFloat("nota_atendimento"));
-                lista.add(a);
+    public ArrayList<Object> listarTodosLazyLoading() {
+        System.out.println("Listando todas as avaliações de atendimento (Lazy Loading)...");
+        ArrayList<Object> listaAvaliacoes = new ArrayList<>();
+        for (AvaliacaoAtendimento avaliacao : avaliacoesAtendimentoDB) {
+            listaAvaliacoes.add(avaliacao);
+        }
+        System.out.println("Total de avaliações de atendimento listadas: " + listaAvaliacoes.size());
+        return listaAvaliacoes;
+    }
+
+    @Override
+    public ArrayList<Object> listarTodosEagerLoading() {
+        System.out.println("Listando todas as avaliações de atendimento (Eager Loading)...");
+        return listarTodosLazyLoading(); // Reutiliza para este exemplo simples
+    }
+
+    @Override
+    public void atualizar(Object obj) {
+        if (obj instanceof AvaliacaoAtendimento) {
+            AvaliacaoAtendimento avaliacaoAtualizada = (AvaliacaoAtendimento) obj;
+            boolean encontrado = false;
+            for (int i = 0; i < avaliacoesAtendimentoDB.size(); i++) {
+                if (avaliacoesAtendimentoDB.get(i).getIdAvaliacao() == avaliacaoAtualizada.getIdAvaliacao()) {
+                    avaliacoesAtendimentoDB.set(i, avaliacaoAtualizada);
+                    encontrado = true;
+                    System.out.println("Avaliação de Atendimento atualizada (ID: " + avaliacaoAtualizada.getIdAvaliacao() + ", Nova Nota: " + avaliacaoAtualizada.getNotaAtendimento() + ")");
+                    break;
+                }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if (!encontrado) {
+                System.out.println("Avaliação de Atendimento com ID " + avaliacaoAtualizada.getIdAvaliacao() + " não encontrada para atualização.");
+            }
+        } else {
+            System.out.println("Objeto não é uma instância de AvaliacaoAtendimento. Não atualizado.");
         }
-        return lista;
-    }
-
-    @Override
-    public ArrayList<Object> findAllEagerLoading() {
-        return findAllLazyLoading();
-    }
-
-    @Override
-    public void atualizar(Object entity) {
-        if (!(entity instanceof AvaliacaoAtendimento)) {
-            throw new IllegalArgumentException("Objeto deve ser do tipo AvaliacaoAtendimento.");
-        }
-        AvaliacaoAtendimento avaliacao = (AvaliacaoAtendimento) entity;
-        String sql = "UPDATE avaliacao_atendimento SET nota_atendimento = ? WHERE id = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setFloat(1, avaliacao.getNotaAtendimento());
-            pstm.setInt(2, 0); // Substitua 0 pelo id real
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void excluir(Object entity) {
-        excluir(0); // Substitua 0 pelo id real
     }
 
     @Override
     public void excluir(int id) {
-        String sql = "DELETE FROM avaliacao_atendimento WHERE id = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, id);
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        System.out.println("Tentando excluir avaliação de atendimento pelo ID: " + id);
+        boolean removido = avaliacoesAtendimentoDB.removeIf(avaliacao -> avaliacao.getIdAvaliacao() == id);
+        if (removido) {
+            System.out.println("Avaliação de Atendimento com ID " + id + " excluída com sucesso.");
+        } else {
+            System.out.println("Avaliação de Atendimento com ID " + id + " não encontrada para exclusão.");
         }
     }
 }

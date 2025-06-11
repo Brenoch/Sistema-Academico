@@ -1,123 +1,84 @@
 package DAO;
 
-import util.Avaliacao;
-import util.AvaliacaoComida;
-import java.sql.*;
 import java.util.ArrayList;
+import util.AvaliacaoComida; // Importa a classe de entidade
 
-public class AvaliacaoComidaDAO implements BaseDAO {
-    private final Connection connection;
+public class AvaliacaoComidaDAO implements BaseDAO { // Implementa BaseDAO
 
-    public AvaliacaoComidaDAO(Connection connection) {
-        this.connection = connection;
+    private static ArrayList<AvaliacaoComida> avaliacoesComidaDB = new ArrayList<>(); //
+    private static int nextIdAvaliacaoComida = 1; //
+
+    @Override
+    public void salvar(Object obj) {
+        if (obj instanceof AvaliacaoComida) {
+            AvaliacaoComida avaliacaoComida = (AvaliacaoComida) obj; //
+            avaliacaoComida.setIdAvaliacao(nextIdAvaliacaoComida++); //
+            avaliacoesComidaDB.add(avaliacaoComida); //
+            System.out.println("Avaliação de Comida salva (ID: " + avaliacaoComida.getIdAvaliacao() + ", Nota: " + avaliacaoComida.getNotaComida() + ")"); //
+        } else {
+            System.out.println("Objeto não é uma instância de AvaliacaoComida. Não salvo."); //
+        }
     }
 
     @Override
-    public void salvar(Object entity) {
-        if (!(entity instanceof AvaliacaoComida)) {
-            throw new IllegalArgumentException("Tipo inválido. Esperado AvaliacaoComida.");
+    public Object buscarPorId(int id) {
+        System.out.println("Buscando avaliação de comida pelo ID: " + id); //
+        for (AvaliacaoComida avaliacao : avaliacoesComidaDB) { //
+            if (avaliacao.getIdAvaliacao() == id) { //
+                System.out.println("Avaliação de Comida encontrada: " + avaliacao.getNotaComida()); //
+                return avaliacao; //
+            }
         }
+        System.out.println("Avaliação de Comida com ID " + id + " não encontrada."); //
+        return null; //
+    }
 
-        AvaliacaoComida avaliacao = (AvaliacaoComida) entity;
-        String sql = "INSERT INTO avaliacao_comida (nota_comida) VALUES (?)";
+    @Override
+    public ArrayList<Object> listarTodosLazyLoading() {
+        System.out.println("Listando todas as avaliações de comida (Lazy Loading)..."); //
+        ArrayList<Object> listaAvaliacoes = new ArrayList<>(); //
+        for (AvaliacaoComida avaliacao : avaliacoesComidaDB) { //
+            listaAvaliacoes.add(avaliacao); //
+        }
+        System.out.println("Total de avaliações de comida listadas: " + listaAvaliacoes.size()); //
+        return listaAvaliacoes; //
+    }
 
-        try (PreparedStatement pstm = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstm.setFloat(1, avaliacao.getNotaComida());
-            pstm.executeUpdate();
+    @Override
+    public ArrayList<Object> listarTodosEagerLoading() {
+        System.out.println("Listando todas as avaliações de comida (Eager Loading)..."); //
+        return listarTodosLazyLoading(); //
+    }
 
-            try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    avaliacao.setId(generatedKeys.getInt(1));
+    @Override
+    public void atualizar(Object obj) {
+        if (obj instanceof AvaliacaoComida) {
+            AvaliacaoComida avaliacaoAtualizada = (AvaliacaoComida) obj; //
+            boolean encontrado = false; //
+            for (int i = 0; i < avaliacoesComidaDB.size(); i++) { //
+                if (avaliacoesComidaDB.get(i).getIdAvaliacao() == avaliacaoAtualizada.getIdAvaliacao()) { //
+                    avaliacoesComidaDB.set(i, avaliacaoAtualizada); //
+                    encontrado = true; //
+                    System.out.println("Avaliação de Comida atualizada (ID: " + avaliacaoAtualizada.getIdAvaliacao() + ", Nova Nota: " + avaliacaoAtualizada.getNotaComida() + ")"); //
+                    break; //
                 }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao salvar avaliação", e);
-        }
-    }
-
-    @Override
-    public void atualizar(Object entity) {
-        if (!(entity instanceof AvaliacaoComida)) {
-            throw new IllegalArgumentException("Tipo inválido. Esperado AvaliacaoComida.");
-        }
-
-        AvaliacaoComida avaliacao = (AvaliacaoComida) entity;
-        String sql = "UPDATE avaliacao_comida SET nota_comida = ? WHERE id = ?";
-
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setFloat(1, avaliacao.getNotaComida());
-            pstm.setInt(2, avaliacao.getId());
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao atualizar avaliação", e);
-        }
-    }
-
-    @Override
-    public void excluir(Object entity) {
-        if (entity instanceof AvaliacaoComida) {
-            excluir(((AvaliacaoComida) entity).getId());
+            if (!encontrado) { //
+                System.out.println("Avaliação de Comida com ID " + avaliacaoAtualizada.getIdAvaliacao() + " não encontrada para atualização."); //
+            }
         } else {
-            throw new IllegalArgumentException("Tipo inválido. Esperado AvaliacaoComida.");
+            System.out.println("Objeto não é uma instância de AvaliacaoComida. Não atualizado."); //
         }
     }
 
     @Override
     public void excluir(int id) {
-        String sql = "DELETE FROM avaliacao_comida WHERE id = ?";
-
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, id);
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao excluir avaliação", e);
+        System.out.println("Tentando excluir avaliação de comida pelo ID: " + id); //
+        boolean removido = avaliacoesComidaDB.removeIf(avaliacao -> avaliacao.getIdAvaliacao() == id); //
+        if (removido) { //
+            System.out.println("Avaliação de Comida com ID " + id + " excluída com sucesso."); //
+        } else {
+            System.out.println("Avaliação de Comida com ID " + id + " não encontrada para exclusão."); //
         }
-    }
-
-    @Override
-    public AvaliacaoComida findById(int id) {
-        String sql = "SELECT id, nota_comida FROM avaliacao_comida WHERE id = ?";
-
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, id);
-
-            try (ResultSet rs = pstm.executeQuery()) {  // Nome da variável: rs
-                if (rs.next()) {
-                    AvaliacaoComida avaliacao = new AvaliacaoComida(rs.getFloat("nota_comida"));  // Corrigido para 'rs'
-                    avaliacao.setId(rs.getInt("id"));
-                    avaliacao.setNotaComida(rs.getFloat("nota_comida"));  // Corrigido nome do método (setNotaComida)
-                    return avaliacao;
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar avaliação por ID", e);
-        }
-        return null;
-    }
-
-    @Override
-    public ArrayList<Object> findAllLazyLoading() {
-        ArrayList<Object> avaliacoes = new ArrayList<>();
-        String sql = "SELECT id, nota_comida FROM avaliacao_comida";
-
-        try (PreparedStatement pstm = connection.prepareStatement(sql);
-             ResultSet rs = pstm.executeQuery()) {
-
-            while (rs.next()) {
-                AvaliacaoComida avaliacao = new AvaliacaoComida(rs.getFloat(("nota_comida")));
-                avaliacao.setId(rs.getInt("id"));
-                avaliacao.setNotaComida(rs.getFloat("nota_comida"));
-                avaliacoes.add(avaliacao);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar todas as avaliações", e);
-        }
-        return avaliacoes;
-    }
-
-    @Override
-    public ArrayList<Object> findAllEagerLoading() {
-        // Neste caso simples, eager loading é igual ao lazy loading
-        return findAllLazyLoading();
     }
 }

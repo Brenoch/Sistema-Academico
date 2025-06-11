@@ -1,44 +1,28 @@
 package util;
 
+// Esta é uma classe abstrata, pois 'comentar' é abstrato
 public abstract class Avaliacao {
-    float nota;
-    float Avaliacao;
+    private int idAvaliacao; // <--- Adicionado para suportar os DAOs
+    protected float nota;
 
-    public Avaliacao(){
-        this.nota = nota;
+    // Construtor padrão, ou construtor que inicialize idAvaliacao
+    public Avaliacao() {
+        // Pode ser deixado vazio ou inicializar algo se necessário
     }
+
+    // Método getter para o ID da avaliação
+    public int getIdAvaliacao() { // <--- Adicionado
+        return idAvaliacao;
+    }
+
+    // Método setter para o ID da avaliação
+    public void setIdAvaliacao(int idAvaliacao) { // <--- Adicionado
+        this.idAvaliacao = idAvaliacao;
+    }
+
+    protected abstract void comentar(); // Mantém o método abstrato
 
     public float getNota() {
         return nota;
     }
-
-    protected abstract void comentar();
-
-    public void setNota(int anInt) {
-    }
-
-    public float addAvaliacao(){
-        return Avaliacao;
-    }
-
-    public void setNotaComida(float notaComida) {
-
-    }
-
-    public float getAvaliacao(){
-        return Avaliacao;
-    }
-
-    public void avaliar(AvaliacaoAtendimento atendimento, AvaliacaoComida comida,
-                        AvaliacaoAmbiente ambiente, AvaliacaoLocalizacao local) {
-
-
-        System.out.println("\n--- Sua avaliação ---");
-        System.out.printf("Atendimento: %.1f%n", atendimento.getNota());
-        System.out.printf("Comida:      %.1f%n", comida.getNota());
-        System.out.printf("Ambiente:    %.1f%n", ambiente.getNota());
-        System.out.printf("Localização: %.1f%n", local.getNota());
-    }
 }
-
-

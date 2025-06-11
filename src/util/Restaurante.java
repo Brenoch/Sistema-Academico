@@ -1,11 +1,24 @@
 package util;
+
 import java.sql.Date;
 
 public class Restaurante {
    private int idrestaurante;
    private String nome;
-   private String local;
+   private Local local; // Alterado de String para objeto Local
    private Date datasql = Date.valueOf("2010-07-03");
+
+   // Construtor adicionado para permitir a criação do objeto com ID e Local
+   public Restaurante(int idrestaurante, String nome, Local local, Date datasql) {
+      this.idrestaurante = idrestaurante;
+      this.nome = nome;
+      this.local = local; // Atribui o objeto Local
+      this.datasql = datasql;
+   }
+
+   // Construtor padrão
+   public Restaurante() {
+   }
 
    public String getNome() {
       return nome;
@@ -15,7 +28,7 @@ public class Restaurante {
       return idrestaurante;
    }
 
-   public String getLocal() {
+   public Local getLocal() { // Retorna um objeto Local
       return local;
    }
 
@@ -31,7 +44,7 @@ public class Restaurante {
       this.nome = nome;
    }
 
-   public void setLocal(String local) {
+   public void setLocal(Local local) { // Aceita um objeto Local
       this.local = local;
    }
 

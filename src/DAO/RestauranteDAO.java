@@ -1,119 +1,110 @@
 package DAO;
 
-import util.Restaurante;
-import java.sql.*;
 import java.util.ArrayList;
+import util.Restaurante;
+import util.Local; // Importa a classe Local
 
 public class RestauranteDAO implements BaseDAO {
-    private final Connection connection;
 
-    public RestauranteDAO(Connection connection) {
-        this.connection = connection;
+    private static ArrayList<Restaurante> restaurantesDB = new ArrayList<>();
+    private static int nextIdRestaurante = 1;
+
+    @Override
+    public void salvar(Object obj) {
+        if (obj instanceof Restaurante) {
+            Restaurante restaurante = (Restaurante) obj;
+            restaurante.setIdrestaurante(nextIdRestaurante++);
+            restaurantesDB.add(restaurante);
+            System.out.println("Restaurante salvo (ID: " + restaurante.getIdrestaurante() + ", Nome: " + restaurante.getNome() + ", Local: " + (restaurante.getLocal() != null ? restaurante.getLocal().getCidade() : "N/A") + ")");
+        } else {
+            System.out.println("Objeto não é uma instância de Restaurante. Não salvo.");
+        }
     }
 
     @Override
-    public void salvar(Object entity) {
-        if (!(entity instanceof Restaurante)) {
-            throw new IllegalArgumentException("Objeto deve ser do tipo Restaurante.");
-        }
-        Restaurante restaurante = (Restaurante) entity;
-        String sql = "INSERT INTO restaurante (nome, local, datasql) VALUES (?, ?, ?)";
-        try (PreparedStatement pstm = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstm.setString(1, restaurante.getNome());
-            pstm.setString(2, restaurante.getLocal());
-            pstm.setDate(3, restaurante.getDatasql());
-            pstm.executeUpdate();
-            try (ResultSet rst = pstm.getGeneratedKeys()) {
-                if (rst.next()) {
-                    restaurante.setIdrestaurante(rst.getInt(1));
-                }
+    public Object buscarPorId(int id) {
+        System.out.println("Buscando restaurante pelo ID: " + id);
+        for (Restaurante restaurante : restaurantesDB) {
+            if (restaurante.getIdrestaurante() == id) {
+                System.out.println("Restaurante encontrado: " + restaurante.getNome());
+                return restaurante;
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public void atualizar(Object entity) {
-        if (!(entity instanceof Restaurante)) {
-            throw new IllegalArgumentException("Objeto deve ser do tipo Restaurante.");
-        }
-        Restaurante restaurante = (Restaurante) entity;
-        String sql = "UPDATE restaurante SET nome = ?, local = ?, datasql = ? WHERE idrestaurante = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setString(1, restaurante.getNome());
-            pstm.setString(2, restaurante.getLocal());
-            pstm.setDate(3, restaurante.getDatasql());
-            pstm.setInt(4, restaurante.getIdrestaurante());
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void excluir(Object entity) {
-        if (!(entity instanceof Restaurante)) {
-            throw new IllegalArgumentException("Objeto deve ser do tipo Restaurante.");
-        }
-        Restaurante restaurante = (Restaurante) entity;
-        excluir(restaurante.getIdrestaurante());
-    }
-
-    @Override
-    public void excluir(int id) {
-        String sql = "DELETE FROM restaurante WHERE idrestaurante = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, id);
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public Object findById(int id) {
-        String sql = "SELECT idrestaurante, nome, local, datasql FROM restaurante WHERE idrestaurante = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, id);
-            try (ResultSet rst = pstm.executeQuery()) {
-                if (rst.next()) {
-                    Restaurante restaurante = new Restaurante();
-                    restaurante.setIdrestaurante(rst.getInt("idrestaurante"));
-                    restaurante.setNome(rst.getString("nome"));
-                    restaurante.setLocal(rst.getString("local"));
-                    restaurante.setDatasql(rst.getDate("datasql"));
-                    return restaurante;
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        System.out.println("Restaurante com ID " + id + " não encontrado.");
         return null;
     }
 
     @Override
-    public ArrayList<Object> findAllLazyLoading() {
-        ArrayList<Object> lista = new ArrayList<>();
-        String sql = "SELECT idrestaurante, nome, local, datasql FROM restaurante";
-        try (PreparedStatement pstm = connection.prepareStatement(sql);
-             ResultSet rst = pstm.executeQuery()) {
-            while (rst.next()) {
-                Restaurante restaurante = new Restaurante();
-                restaurante.setIdrestaurante(rst.getInt("idrestaurante"));
-                restaurante.setNome(rst.getString("nome"));
-                restaurante.setLocal(rst.getString("local"));
-                restaurante.setDatasql(rst.getDate("datasql"));
-                lista.add(restaurante);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    public ArrayList<Object> listarTodosLazyLoading() {
+        System.out.println("Listando todos os restaurantes (Lazy Loading)...");
+        ArrayList<Object> listaRestaurantes = new ArrayList<>();
+        for (Restaurante restaurante : restaurantesDB) {
+            listaRestaurantes.add(restaurante);
         }
-        return lista;
+        System.out.println("Total de restaurantes listados: " + listaRestaurantes.size());
+        return listaRestaurantes;
     }
 
     @Override
-    public ArrayList<Object> findAllEagerLoading() {
-        return findAllLazyLoading();
+    public ArrayList<Object> listarTodosEagerLoading() {
+        System.out.println("Listando todos os restaurantes (Eager Loading)...");
+        return listarTodosLazyLoading(); // Reutiliza para este exemplo simples
+    }
+
+    @Override
+    public void atualizar(Object obj) {
+        if (obj instanceof Restaurante) {
+            Restaurante restauranteAtualizado = (Restaurante) obj;
+            boolean encontrado = false;
+            for (int i = 0; i < restaurantesDB.size(); i++) {
+                if (restaurantesDB.get(i).getIdrestaurante() == restauranteAtualizado.getIdrestaurante()) {
+                    restaurantesDB.set(i, restauranteAtualizado);
+                    encontrado = true;
+                    System.out.println("Restaurante atualizado (ID: " + restauranteAtualizado.getIdrestaurante() + ", Novo Nome: " + restauranteAtualizado.getNome() + ", Novo Local: " + (restauranteAtualizado.getLocal() != null ? restauranteAtualizado.getLocal().getCidade() : "N/A") + ")");
+                    break;
+                }
+            }
+            if (!encontrado) {
+                System.out.println("Restaurante com ID " + restauranteAtualizado.getIdrestaurante() + " não encontrado para atualização.");
+            }
+        } else {
+            System.out.println("Objeto não é uma instância de Restaurante. Não atualizado.");
+        }
+    }
+
+    @Override
+    public void excluir(int id) {
+        System.out.println("Tentando excluir restaurante pelo ID: " + id);
+        boolean removido = restaurantesDB.removeIf(restaurante -> restaurante.getIdrestaurante() == id);
+        if (removido) {
+            System.out.println("Restaurante com ID " + id + " excluído com sucesso.");
+        } else {
+            System.out.println("Restaurante com ID " + id + " não encontrado para exclusão.");
+        }
+    }
+
+    public Restaurante buscarPorNome(String nome) {
+        System.out.println("Buscando restaurante pelo nome: " + nome);
+        for (Restaurante restaurante : restaurantesDB) {
+            if (restaurante.getNome() != null && restaurante.getNome().equalsIgnoreCase(nome)) {
+                System.out.println("Restaurante encontrado por nome: " + restaurante.getNome());
+                return restaurante;
+            }
+        }
+        System.out.println("Restaurante com nome '" + nome + "' não encontrado.");
+        return null;
+    }
+
+    // Método específico para buscar restaurantes por Local (cidade)
+    public ArrayList<Restaurante> buscarPorLocalCidade(String cidade) {
+        ArrayList<Restaurante> restaurantesEncontrados = new ArrayList<>();
+        System.out.println("Buscando restaurantes na cidade: " + cidade);
+        for (Restaurante restaurante : restaurantesDB) {
+            if (restaurante.getLocal() != null && restaurante.getLocal().getCidade() != null && restaurante.getLocal().getCidade().equalsIgnoreCase(cidade)) {
+                restaurantesEncontrados.add(restaurante);
+            }
+        }
+        System.out.println("Total de restaurantes encontrados na cidade '" + cidade + "': " + restaurantesEncontrados.size());
+        return restaurantesEncontrados;
     }
 }

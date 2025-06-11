@@ -1,12 +1,17 @@
 package DAO;
- import java.util.ArrayList;
+
+import java.util.ArrayList;
 
 public interface BaseDAO {
-    void salvar(Object entity);
-    void atualizar(Object entity);
-    void excluir(Object entity);
-    Object findById(int id);
-    ArrayList<Object> findAllLazyLoading();
-    ArrayList<Object> findAllEagerLoading();
-    void excluir(int id);
+    void salvar(Object var1); // Remova @Override aqui
+
+    Object buscarPorId(int var1); // Remova @Override aqui
+
+    ArrayList<Object> listarTodosLazyLoading(); // Remova @Override aqui
+
+    ArrayList<Object> listarTodosEagerLoading(); // Remova @Override aqui
+
+    void atualizar(Object var1); // Remova @Override aqui
+
+    void excluir(int var1); // Remova @Override aqui
 }

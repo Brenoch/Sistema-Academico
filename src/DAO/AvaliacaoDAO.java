@@ -1,118 +1,84 @@
 package DAO;
 
-import java.sql.*;
 import java.util.ArrayList;
-import util.Cliente;
-import util.Avaliacao;
+import util.Avaliacao; // Importa a superclasse Avaliacao
 
-public class AvaliacaoDAO implements BaseDAO {
+public class AvaliacaoDAO implements BaseDAO { // Implementa BaseDAO
 
-    private final Connection connection;
+    private static ArrayList<Avaliacao> avaliacoesDB = new ArrayList<>();
+    private static int nextIdAvaliacao = 1;
 
-    public AvaliacaoDAO(Connection connection) {
-        this.connection = connection;
+    @Override
+    public void salvar(Object obj) {
+        if (obj instanceof Avaliacao) {
+            Avaliacao avaliacao = (Avaliacao) obj;
+            avaliacao.setIdAvaliacao(nextIdAvaliacao++);
+            avaliacoesDB.add(avaliacao);
+            System.out.println("Avaliação genérica salva (ID: " + avaliacao.getIdAvaliacao() + ")");
+        } else {
+            System.out.println("Objeto não é uma instância de Avaliacao. Não salvo.");
+        }
     }
 
     @Override
-    public void salvar(Object objeto) {
-        if (!(objeto instanceof Avaliacao)) {
-            throw new IllegalArgumentException("Objeto deve ser do tipo Avaliacao.");
-        }
-        Avaliacao avaliacao = (Avaliacao) objeto;
-        String sql = "INSERT INTO avaliacao (nota, fk_cliente) VALUES (?, ?)";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setFloat(1, avaliacao.getNota());
-            pstm.setNull(2, Types.INTEGER);
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public ArrayList<Float> listAll(Cliente cliente) {
-        ArrayList<Float> avaliacoes = new ArrayList<>();
-        String sql = "SELECT nota FROM avaliacao WHERE fk_cliente = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, cliente.getIdcliente());
-            try (ResultSet rst = pstm.executeQuery()) {
-                while (rst.next()) {
-                    avaliacoes.add(rst.getFloat("nota"));
-                }
+    public Object buscarPorId(int id) {
+        System.out.println("Buscando avaliação genérica pelo ID: " + id);
+        for (Avaliacao avaliacao : avaliacoesDB) {
+            if (avaliacao.getIdAvaliacao() == id) {
+                System.out.println("Avaliação genérica encontrada (ID: " + avaliacao.getIdAvaliacao() + ")");
+                return avaliacao;
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
-        return avaliacoes;
-    }
-
-    @Override
-    public Object findById(int id) {
-        String sql = "SELECT nota FROM avaliacao WHERE idavaliacao = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, id);
-            try (ResultSet rst = pstm.executeQuery()) {
-                if (rst.next()) {
-                    return rst.getFloat("nota");
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        System.out.println("Avaliação genérica com ID " + id + " não encontrada.");
         return null;
     }
 
     @Override
-    public ArrayList<Object> findAllLazyLoading() {
-        ArrayList<Object> avaliacoes = new ArrayList<>();
-        String sql = "SELECT nota FROM avaliacao";
-        try (PreparedStatement pstm = connection.prepareStatement(sql);
-             ResultSet rst = pstm.executeQuery()) {
-            while (rst.next()) {
-                avaliacoes.add(rst.getFloat("nota"));
+    public ArrayList<Object> listarTodosLazyLoading() {
+        System.out.println("Listando todas as avaliações genéricas (Lazy Loading)...");
+        ArrayList<Object> listaAvaliacoes = new ArrayList<>();
+        for (Avaliacao avaliacao : avaliacoesDB) {
+            listaAvaliacoes.add(avaliacao);
+        }
+        System.out.println("Total de avaliações genéricas listadas: " + listaAvaliacoes.size());
+        return listaAvaliacoes;
+    }
+
+    @Override
+    public ArrayList<Object> listarTodosEagerLoading() {
+        System.out.println("Listando todas as avaliações genéricas (Eager Loading)...");
+        return listarTodosLazyLoading();
+    }
+
+    @Override
+    public void atualizar(Object obj) {
+        if (obj instanceof Avaliacao) {
+            Avaliacao avaliacaoAtualizada = (Avaliacao) obj;
+            boolean encontrado = false;
+            for (int i = 0; i < avaliacoesDB.size(); i++) {
+                if (avaliacoesDB.get(i).getIdAvaliacao() == avaliacaoAtualizada.getIdAvaliacao()) {
+                    avaliacoesDB.set(i, avaliacaoAtualizada);
+                    encontrado = true;
+                    System.out.println("Avaliação genérica atualizada (ID: " + avaliacaoAtualizada.getIdAvaliacao() + ")");
+                    break;
+                }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if (!encontrado) {
+                System.out.println("Avaliação genérica com ID " + avaliacaoAtualizada.getIdAvaliacao() + " não encontrada para atualização.");
+            }
+        } else {
+            System.out.println("Objeto não é uma instância de Avaliacao. Não atualizado.");
         }
-        return avaliacoes;
-    }
-
-    @Override
-    public ArrayList<Object> findAllEagerLoading() {
-        return findAllLazyLoading();
-    }
-
-    @Override
-    public void atualizar(Object objeto) {
-        if (!(objeto instanceof Avaliacao)) {
-            throw new IllegalArgumentException("Objeto deve ser do tipo Avaliacao.");
-        }
-        Avaliacao avaliacao = (Avaliacao) objeto;
-        String sql = "UPDATE avaliacao SET nota = ? WHERE idavaliacao = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setFloat(1, avaliacao.getNota());
-            pstm.setInt(2, 0);
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void excluir(Object objeto) {
-        if (!(objeto instanceof Avaliacao)) {
-            throw new IllegalArgumentException("Objeto deve ser do tipo Avaliacao.");
-        }
-        excluir(0);
     }
 
     @Override
     public void excluir(int id) {
-        String sql = "DELETE FROM avaliacao WHERE idavaliacao = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, id);
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        System.out.println("Tentando excluir avaliação genérica pelo ID: " + id);
+        boolean removido = avaliacoesDB.removeIf(avaliacao -> avaliacao.getIdAvaliacao() == id);
+        if (removido) {
+            System.out.println("Avaliação genérica com ID " + id + " excluída com sucesso.");
+        } else {
+            System.out.println("Avaliação genérica com ID " + id + " não encontrada para exclusão.");
         }
     }
 }

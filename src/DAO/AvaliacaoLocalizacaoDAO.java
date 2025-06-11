@@ -1,99 +1,84 @@
 package DAO;
 
-import util.AvaliacaoLocalizacao;
-import java.sql.*;
 import java.util.ArrayList;
+import util.AvaliacaoLocalizacao; // Assumindo que você tem esta classe
 
-public class AvaliacaoLocalizacaoDAO implements BaseDAO {
-    private final Connection connection;
+public class AvaliacaoLocalizacaoDAO implements BaseDAO { // Implementa BaseDAO
 
-    public AvaliacaoLocalizacaoDAO(Connection connection) {
-        this.connection = connection;
-    }
+    private static ArrayList<AvaliacaoLocalizacao> avaliacoesLocalizacaoDB = new ArrayList<>();
+    private static int nextIdAvaliacaoLocalizacao = 1;
 
     @Override
-    public void salvar(Object entity) {
-        if (!(entity instanceof AvaliacaoLocalizacao)) {
-            throw new IllegalArgumentException("Objeto deve ser do tipo AvaliacaoLocalizacao.");
-        }
-        AvaliacaoLocalizacao avaliacao = (AvaliacaoLocalizacao) entity;
-        String sql = "INSERT INTO avaliacao_localizacao (nota_localizacao) VALUES (?)";
-        try (PreparedStatement pstm = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstm.setFloat(1, avaliacao.getNotaLocalizacao());
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    public void salvar(Object obj) {
+        if (obj instanceof AvaliacaoLocalizacao) {
+            AvaliacaoLocalizacao avaliacaoLocalizacao = (AvaliacaoLocalizacao) obj;
+            avaliacaoLocalizacao.setIdAvaliacao(nextIdAvaliacaoLocalizacao++);
+            avaliacoesLocalizacaoDB.add(avaliacaoLocalizacao);
+            System.out.println("Avaliação de Localização salva (ID: " + avaliacaoLocalizacao.getIdAvaliacao() + ", Nota: " + avaliacaoLocalizacao.getNotaLocalizacao() + ")");
+        } else {
+            System.out.println("Objeto não é uma instância de AvaliacaoLocalizacao. Não salvo.");
         }
     }
 
     @Override
-    public Object findById(int id) {
-        String sql = "SELECT id, nota_localizacao FROM avaliacao_localizacao WHERE id = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, id);
-            try (ResultSet rst = pstm.executeQuery()) {
-                if (rst.next()) {
-                    AvaliacaoLocalizacao a = new AvaliacaoLocalizacao(rst.getFloat("nota_localizacao"));
-                    // Se houver campo id, setar aqui: a.setId(rst.getInt("id"));
-                    return a;
-                }
+    public Object buscarPorId(int id) {
+        System.out.println("Buscando avaliação de localização pelo ID: " + id);
+        for (AvaliacaoLocalizacao avaliacao : avaliacoesLocalizacaoDB) {
+            if (avaliacao.getIdAvaliacao() == id) {
+                System.out.println("Avaliação de Localização encontrada: " + avaliacao.getNotaLocalizacao());
+                return avaliacao;
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
+        System.out.println("Avaliação de Localização com ID " + id + " não encontrada.");
         return null;
     }
 
     @Override
-    public ArrayList<Object> findAllLazyLoading() {
-        ArrayList<Object> lista = new ArrayList<>();
-        String sql = "SELECT id, nota_localizacao FROM avaliacao_localizacao";
-        try (PreparedStatement pstm = connection.prepareStatement(sql);
-             ResultSet rst = pstm.executeQuery()) {
-            while (rst.next()) {
-                AvaliacaoLocalizacao a = new AvaliacaoLocalizacao(rst.getFloat("nota_localizacao"));
-                lista.add(a);
+    public ArrayList<Object> listarTodosLazyLoading() {
+        System.out.println("Listando todas as avaliações de localização (Lazy Loading)...");
+        ArrayList<Object> listaAvaliacoes = new ArrayList<>();
+        for (AvaliacaoLocalizacao avaliacao : avaliacoesLocalizacaoDB) {
+            listaAvaliacoes.add(avaliacao);
+        }
+        System.out.println("Total de avaliações de localização listadas: " + listaAvaliacoes.size());
+        return listaAvaliacoes;
+    }
+
+    @Override
+    public ArrayList<Object> listarTodosEagerLoading() {
+        System.out.println("Listando todas as avaliações de localização (Eager Loading)...");
+        return listarTodosLazyLoading();
+    }
+
+    @Override
+    public void atualizar(Object obj) {
+        if (obj instanceof AvaliacaoLocalizacao) {
+            AvaliacaoLocalizacao avaliacaoAtualizada = (AvaliacaoLocalizacao) obj;
+            boolean encontrado = false;
+            for (int i = 0; i < avaliacoesLocalizacaoDB.size(); i++) {
+                if (avaliacoesLocalizacaoDB.get(i).getIdAvaliacao() == avaliacaoAtualizada.getIdAvaliacao()) {
+                    avaliacoesLocalizacaoDB.set(i, avaliacaoAtualizada);
+                    encontrado = true;
+                    System.out.println("Avaliação de Localização atualizada (ID: " + avaliacaoAtualizada.getIdAvaliacao() + ", Nova Nota: " + avaliacaoAtualizada.getNotaLocalizacao() + ")");
+                    break;
+                }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if (!encontrado) {
+                System.out.println("Avaliação de Localização com ID " + avaliacaoAtualizada.getIdAvaliacao() + " não encontrada para atualização.");
+            }
+        } else {
+            System.out.println("Objeto não é uma instância de AvaliacaoLocalizacao. Não atualizado.");
         }
-        return lista;
-    }
-
-    @Override
-    public ArrayList<Object> findAllEagerLoading() {
-        return findAllLazyLoading();
-    }
-
-    @Override
-    public void atualizar(Object entity) {
-        if (!(entity instanceof AvaliacaoLocalizacao)) {
-            throw new IllegalArgumentException("Objeto deve ser do tipo AvaliacaoLocalizacao.");
-        }
-        AvaliacaoLocalizacao avaliacao = (AvaliacaoLocalizacao) entity;
-        String sql = "UPDATE avaliacao_localizacao SET nota_localizacao = ? WHERE id = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setFloat(1, avaliacao.getNotaLocalizacao());
-            pstm.setInt(2, 0);
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void excluir(Object entity) {
-        excluir(0); // Substitua 0 pelo id real
     }
 
     @Override
     public void excluir(int id) {
-        String sql = "DELETE FROM avaliacao_localizacao WHERE id = ?";
-        try (PreparedStatement pstm = connection.prepareStatement(sql)) {
-            pstm.setInt(1, id);
-            pstm.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        System.out.println("Tentando excluir avaliação de localização pelo ID: " + id);
+        boolean removido = avaliacoesLocalizacaoDB.removeIf(avaliacao -> avaliacao.getIdAvaliacao() == id);
+        if (removido) {
+            System.out.println("Avaliação de Localização com ID " + id + " excluída com sucesso.");
+        } else {
+            System.out.println("Avaliação de Localização com ID " + id + " não encontrada para exclusão.");
         }
     }
 }
