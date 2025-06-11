@@ -1,29 +1,75 @@
 package util;
 
-import java.sql.SQLOutput;
+import java.util.Scanner;
 
 public class Cliente {
-    private int cpf;
+    private int idcliente;
+    private String cpf;
     private String nome;
     private String email;
     private String senha;
 
-    public Cliente(int cpf, String nome, String email, String senha) {
+    public Cliente(int idcliente, String cpf, String nome, String email, String senha) {
         this.cpf = cpf;
         this.nome = nome;
         this.email = email;
         this.senha = senha;
     }
 
-    public static void avaliar(AvaliacaoAtendimento atendimento, AvaliacaoComida comida, AvaliacaoAmbiente ambiente) {
-        float nota = (atendimento.getNota() + comida.getNota() + ambiente.getNota());
+    public String getEmail() {
+        return email;
+    }
 
-        if (nota <= 1.9f) {
-            System.out.println("Avaliação: Ruim");
-        } else if (nota <= 3.9f) {
-            System.out.println("Avaliação: Boa");
+    public String getSenha() {
+        return senha;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+    public String getNome() {
+        return nome;
+    }
+    public int getIdcliente() {
+        return idcliente;
+    }
+
+
+
+    public boolean login(String email, String senha) {
+        if (this.email.equals(email) && this.senha.equals(senha)) {
+            System.out.println("Login bem-sucedido!");
+            return true;
         } else {
-            System.out.println("Avaliação: Excelente");
+            System.out.println("Email ou senha incorretos.");
+            return false;
         }
     }
+
+    public boolean login(String email, boolean isEmailOnly) {
+        return login(email, this.senha);
+    }
+
+    public void autenticacao() {
+        try (Scanner scanner = new Scanner(System.in)) {
+            String email;
+            String senha;
+
+            do {
+                System.out.println("Digite seu email: ");
+                email = scanner.nextLine();
+
+                System.out.println("Digite sua senha: ");
+                senha = scanner.nextLine();
+
+            } while (!login(email, senha));
+        }
+    }
+
+
+
+public void setId(int idcliente) {
+    }
+
+
 }

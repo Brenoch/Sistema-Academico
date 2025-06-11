@@ -1,28 +1,26 @@
- import util.AvaliacaoAmbiente;
-import util.AvaliacaoAtendimento;
-import util.AvaliacaoComida;
-import util.Cliente;
+import util.*;
+
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        Scanner aval = new Scanner(System.in);
 
-        Scanner notatst = new Scanner(System.in);
-        System.out.print("Digite a nota de atendimento: ");
-        float notaAtendimento = notatst.nextFloat();
+        Cliente armando = new Cliente(1, "12356788", "armando" , "abc", "12345");
+        armando.autenticacao();
 
-        System.out.print("Digite a nota de comida: ");
-        float notaComida = notatst.nextFloat();
+        AvaliacaoAtendimento atendimento = new AvaliacaoAtendimento(5.0f);
+        AvaliacaoComida comida = new AvaliacaoComida(4.7f);
+        AvaliacaoAmbiente ambiente = new AvaliacaoAmbiente(5.0f);
+        AvaliacaoLocalizacao local = new AvaliacaoLocalizacao(4.2f);
 
-        System.out.print("Digite a nota de ambiente: ");
-        float notaAmbiente = notatst.nextFloat();
+        System.out.println("Notas: ");
+        System.out.println("Atendimento: " + atendimento.getNotaAtendimento());
+        System.out.println("Comida: " + comida.getNotaComida());
+        System.out.println("Ambiente: " + ambiente.getNotaAmbiente());
+        System.out.println("Localização: " + local.getNotaLocalizacao());
 
-        AvaliacaoAtendimento atendimento = new AvaliacaoAtendimento(notaAtendimento);
-        AvaliacaoComida comida = new AvaliacaoComida(notaComida);
-        AvaliacaoAmbiente ambiente = new AvaliacaoAmbiente(notaAmbiente);
+        Classificacao.calcularClassificacao();
 
-        Cliente jose = new Cliente(19324295, "Armando", "Armando@gmail.com", "12356");
-
-        Cliente.avaliar(atendimento, comida, ambiente);
     }
 }
